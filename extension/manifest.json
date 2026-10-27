@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "考得尚解锁器 · 课程视频与题库",
+  "version": "1.0.0",
+  "description": "解锁考得尚网校全部课程视频（758 讲），内置真题题库 1903 题，支持章节练习与真题模拟。",
+  "permissions": [
+    "cookies",
+    "storage",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*.kaodes.com/*",
+    "*://beegoapi.beeeeego.com/*",
+    "*://*.baijiayun.com/*",
+    "*://*.polyv.net/*",
+    "*://*.beeeeego.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "考得尚解锁器",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.kaodes.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "catalog.json",
+        "bank.json",
+        "player.html"
+      ],
+      "matches": [
+        "*://*.kaodes.com/*"
+      ]
+    }
+  ]
+}

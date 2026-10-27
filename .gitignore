@@ -1,0 +1,29 @@
+# 依赖
+node_modules/
+*.log
+
+# 真实登录凭据（含时效 token）
+data/vault.json
+
+# 中间产物（体积大，ingest 脚本可重建）
+data/bank.json
+data/catalog.json
+data/product_index.json
+data/library_raw.json
+data/library.json
+data/subject_match.json
+data/products_computer.json
+data/catalog_03709.json
+data/catalog_25390_40201.json
+data/chapter_questions.json
+data/question_bank.json
+data/play/
+
+# 探测脚本（开发过程产物）
+probes/
+ego/
+shots/
+
+# 系统
+.DS_Store
+Thumbs.db

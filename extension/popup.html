@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;width:330px;font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;background:#14161c;color:#e6e8ee}
+  .hd{padding:13px 15px;border-bottom:1px solid #252a36;display:flex;align-items:center;gap:9px}
+  .hd .logo{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#2b5fd9,#4c8bf5);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff}
+  .hd b{font-size:13px}
+  .hd small{display:block;font-size:10px;color:#6f7686;font-weight:400;margin-top:1px}
+  .bd{padding:12px 15px;font-size:12px;line-height:1.7}
+  .row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #1e2229}
+  .row:last-child{border-bottom:none}
+  .row .k{color:#8f96a8}
+  .row .v{color:#4ade80;font-weight:600}
+  .row .v.warn{color:#d9a84e}
+  .sec{padding:10px 15px;border-top:1px solid #252a36}
+  .sec h4{margin:0 0 7px;font-size:11px;color:#6f7686;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+  .stat{display:flex;justify-content:space-between;font-size:11.5px;padding:4px 0;color:#a8afc0}
+  .stat b{color:#e6e8ee}
+  .ft{padding:10px 15px;border-top:1px solid #252a36;font-size:10.5px;color:#5d6375;line-height:1.6}
+  .badge{display:inline-block;padding:1px 7px;border-radius:9px;background:#1e2a1e;color:#4ade80;font-size:10px}
+</style>
+</head>
+<body>
+  <div class="hd">
+    <div class="logo">K</div>
+    <div>
+      <b>考得尚解锁器</b>
+      <small>课程 · 视频 · 题库</small>
+    </div>
+    <span class="badge" style="margin-left:auto" id="state">运行中</span>
+  </div>
+
+  <div class="bd">
+    <div class="row"><span class="k">视频解锁</span><span class="v">已启用</span></div>
+    <div class="row"><span class="k">课程目录</span><span class="v">已启用</span></div>
+    <div class="row"><span class="k">题库练习</span><span class="v" id="qbank">加载中</span></div>
+    <div class="row"><span class="k">登录态</span><span class="v" id="login">检测中</span></div>
+  </div>
+
+  <div class="sec">
+    <h4>题库</h4>
+    <div id="stats">加载中…</div>
+  </div>
+
+  <div class="ft">
+    打开 kaodes.com 任意页面，右下角「K」按钮打开题库。<br>
+    视频播放不受购买限制，可直接观看。
+  </div>
+
+<script src="popup.js"></script>
+</body>
+</html>
