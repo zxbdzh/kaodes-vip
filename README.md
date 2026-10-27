@@ -105,6 +105,65 @@ POST /special/playVideo  {vid, cstId, courseId, catId, materialType}
 
 **结论：题库是纯服务端权限，客户端无解。** 视频播放虽同样走 `/special/playVideo`，但该接口只验登录态不验授权，所以视频能解锁而题库不能。
 
+## 跳过付款：不可行
+
+支付链路已完整审计，结论是**必须真实付款**。以下是实测证据。
+
+### 支付流程（正确参数）
+
+`pcPay` 用的是 `orderNo` 而非 `orderId`：
+
+```
+GET /order/pcPay?payType=1&orderNo=P2610271113358319835&returnUrl=...
+  → {"code_url":"weixin://wxpay/bizpayurl?pr=5QQN8VJ730FXYVkl","money":19.9}
+
+GET /order/pcPay?payType=2&orderNo=...&returnUrl=...
+  → <form action="https://openapi.alipay.com/gateway.do?...">
+       biz_content={"out_trade_no":"...","total_amount":19.90,"subject":"..."}
+       sign=MUw5gArQ%2BYZ6joM2MzkfrT%2BSmThiwiM...
+```
+
+金额由服务端写入并签名，前端改不了。
+
+### 试过的全部绕过
+
+| 尝试 | 结果 |
+| --- | --- |
+| 订单创建注入 `payResult:1` / `status:2` / `payStatus:1` / `isPay:1` / `orderStatus:2` | 500 数据库错误或字段被忽略 |
+| 订单创建注入 `money:0` / `deduction:19.9` | 建单成功，但服务端重算回 19.9 |
+| `couponId:1` / `couponCode` / `integral:99999` | 忽略，金额不变 |
+| 内部接口 `/order/confirmPay` `/order/markPaid` `/order/paySuccess` `/order/updatePayStatus` `/admin/order/pay` 等 10 个 | 全部 404 |
+| 微信回调 `/order/wx/notify`（多种 XML 格式） | 直接 RST 断开，来源校验 |
+| 支付宝回调 `/order/alipay/notify`（完整参数） | 永远返回 `fail`（RSA2 验签失败） |
+| 0 元商品走完整支付流程 | `pcPay` 返回「未找到商品信息/商品已下架！」 |
+| 篡改支付宝 `total_amount` | 破坏 RSA2 签名，网关拒绝 |
+| `/order/freeGet` 免费领取 | `该商品不能免费领取！` |
+| 优惠券接口 `/coupons/couponsInfo` | 返回 `data: null`（账号无可用券） |
+
+### 为什么绕不过
+
+**1. 金额由服务端重算**
+`money` 字段是只读的，服务端从 `bg_product` 表取价，忽略客户端传值。
+
+**2. 回调验签在服务端**
+- 微信：需要商户 API 密钥（v2 MD5 / v3 RSA），只在服务端
+- 支付宝：需要商户 RSA2 私钥，只在服务端
+
+回调是**唯一**能把 `payResult` 置 1 的路径，且无独立写接口。
+
+**3. 无内部/管理接口暴露**
+`/order/*` 下除了 `create` / `payOrder` / `pcPay` / `userOrderList` / `orderDetail`，其余全部 404。
+
+**4. 0 元商品不覆盖目标课程**
+全库 78 个 0 元商品，唯一计算机相关的是「网络工程师」（¥0），但它本身也无法完成支付流程 —— 下单后 `pcPay` 报「商品已下架」。
+
+### 唯一可行的思路
+
+如果你有该站的管理员/机构后台账号，或能拿到商户 API 密钥，才能伪造回调。否则付款是绕不过的。
+
+走正规路径的实际成本：**¥312.6**（14 门单买，见下节）。
+
+
 ### 解锁全部题库的实际成本
 
 | 方案 | 价格 | 覆盖 |
