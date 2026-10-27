@@ -161,6 +161,39 @@ GET /order/pcPay?payType=2&orderNo=...&returnUrl=...
 
 如果你有该站的管理员/机构后台账号，或能拿到商户 API 密钥，才能伪造回调。否则付款是绕不过的。
 
+### 课程兑换码（另一条路，同样走不通）
+
+站内 `/member/course-exchange` 支持邀请码兑换，接口是 `/myCenter/courseExchange?code=`（注意参数名是 `code`，不是 `inviteCode`）。
+
+前端逻辑（`_nuxt/1c92756.js`）：
+
+```js
+changeInvite(e) {
+  if (e.target.value.length === 14) {           // 固定 14 位
+    this.$api.classStore.courseVerify({ code, domain })
+      .then(r => {
+        switch (r.data.status) {
+          case -1: "请输入正确的兑换码"; break;
+          case  0: "您可以兑换该课程"; break;
+          case  1: "该邀请码已被兑换"; break;
+          case  2: "该邀请码无效"; break;
+          case  3: "该兑换还未开始"; break;
+          case  4: "该邀请码已过期";
+        }
+      });
+  }
+}
+```
+
+`courseExchange` 的报错是「商品不存在」—— 说明码表按 `code` 查 `bg_product` 之类的主键。
+
+**实测结论：**
+
+- 14 位任意字符串（数字/字母/混合）一律 `status: -1`（码不存在）
+- 连续 30 次请求耗时 2.9 秒，**无限速**，但全部返回 `-1`
+- 搜索空间 ≥ 36^14 ≈ 6.1×10²¹，穷举不可行
+- 兑换码只能来自机构方（报名、活动赠送），无法自行生成
+
 走正规路径的实际成本：**¥312.6**（14 门单买，见下节）。
 
 
